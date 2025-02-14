@@ -64,7 +64,7 @@ const handleSubmit = async () => {
     availableColors: availableColors.value,
     hasWifiCompatibility: hasWifiCompatibility.value,
   }).then(() => {
-    productsStore.fetchProducts(productsStore.pagination.currentPage);
+    productsStore.fetchProducts(productsStore.pagination.currentPage, productsStore.currentSearch);
     emit("close");
   }).catch((error) => {
     formError.value = error.message;
