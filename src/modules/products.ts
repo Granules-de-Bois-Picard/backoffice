@@ -11,6 +11,8 @@ export interface Product {
     dimensions: string
     weight: string
     certifications: string
+    availableColors: string[]
+    hasWifiCompatibility: boolean
     created_at: string
     updated_at: string
 }

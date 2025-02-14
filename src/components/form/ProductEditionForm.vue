@@ -2,6 +2,7 @@
 import { ref, defineEmits, watch, onMounted, computed } from "vue";
 import FormInput from "@/components/form/FormInput.vue";
 import FormSubmitButton from "@/components/form/FormSubmitButton.vue";
+import FormCheckbox from "@/components/form/FormCheckbox.vue";
 import { useProductsStore } from "@/stores/products";
 import { XMarkIcon } from "@heroicons/vue/24/solid";
 import ActionButton from "@/components/commons/ActionButton.vue";
@@ -20,6 +21,8 @@ const certifications = ref("");
 const thumbnail_url = ref("");
 const formError = ref<string | null>(null);
 const imagePreview = ref<string | null>(null);
+const availableColors = ref<string[]>([]);
+const hasWifiCompatibility = ref(false);
 
 const emit = defineEmits(["close"]);
 
@@ -29,6 +32,16 @@ const nextStep = () => {
 
 const previousStep = () => {
   currentStep.value--;
+};
+
+const addColor = (color: string) => {
+  if (!availableColors.value.includes(color)) {
+    availableColors.value.push(color);
+  }
+};
+
+const removeColor = (color: string) => {
+  availableColors.value = availableColors.value.filter(c => c !== color);
 };
 
 const handleSubmit = async () => {
@@ -48,6 +61,8 @@ const handleSubmit = async () => {
     weight: weight.value.trim(),
     certifications: certifications.value.trim(),
     thumbnail_url: thumbnail_url.value.trim(),
+    availableColors: availableColors.value,
+    hasWifiCompatibility: hasWifiCompatibility.value,
   }).then(() => {
     productsStore.fetchProducts(productsStore.pagination.currentPage);
     emit("close");
@@ -77,6 +92,8 @@ onMounted(() => {
     weight.value = product.value.weight;
     certifications.value = product.value.certifications;
     thumbnail_url.value = product.value.thumbnail_url;
+    availableColors.value = product.value.availableColors || [];
+    hasWifiCompatibility.value = product.value.hasWifiCompatibility || false;
   }
 });
 
@@ -152,6 +169,35 @@ watch(thumbnail_url, (newUrl) => {
             :placeholder="$t('modals.productEdit.form.certificationPlaceholder')"
             type="text"
         />
+
+        <!-- Sélecteur de couleurs -->
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium">
+            {{ $t('modals.productEdit.form.colors') }}
+          </label>
+          <div class="flex flex-wrap gap-2">
+            <input
+                type="color"
+                @change="(e) => addColor((e.target as HTMLInputElement).value)"
+                class="w-8 h-8 rounded cursor-pointer"
+            >
+            <div v-for="color in availableColors" :key="color"
+                 class="flex items-center gap-1 bg-gray-100 rounded-md p-1">
+              <div :style="{ backgroundColor: color }" class="w-6 h-6 rounded"></div>
+              <button type="button" @click="removeColor(color)"
+                      class="text-xs text-gray-500 hover:text-gray-700">
+                ×
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Checkbox WiFi -->
+        <FormCheckbox
+            v-model="hasWifiCompatibility"
+            :label="$t('modals.productEdit.form.wifi')"
+        />
+
         <div class="flex gap-4">
           <ActionButton :label="$t('common.pagination.previous')" @click="previousStep" white />
           <ActionButton :label="$t('common.pagination.next')" @click="nextStep" />
@@ -203,5 +249,19 @@ watch(thumbnail_url, (newUrl) => {
 .error-transition-enter-to,
 .error-transition-leave-from {
   @apply p-2 opacity-100 max-h-20;
+}
+
+input[type="color"] {
+  -webkit-appearance: none;
+  border: none;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
 }
 </style>
