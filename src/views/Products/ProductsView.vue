@@ -27,13 +27,13 @@ const perPage = computed(() => productsStore.pagination.perPage);
 
 const handlePrev = async () => {
   if (currentPage.value > 1) {
-    await productsStore.fetchProducts(currentPage.value - 1);
+    await productsStore.fetchProducts(currentPage.value - 1, productsStore.currentSearch);
   }
 }
 
 const handleNext = async () => {
   if (currentPage.value < productsStore.pagination.totalPages) {
-    await productsStore.fetchProducts(currentPage.value + 1);
+    await productsStore.fetchProducts(currentPage.value + 1, productsStore.currentSearch);
   }
 }
 
@@ -66,7 +66,7 @@ onMounted(async () => {
 
 watch(search, (value) => {
   if (value) {
-    console.log(value);
+    productsStore.fetchProducts(1, value);
   } else {
     productsStore.fetchProducts(1);
   }
@@ -85,13 +85,13 @@ watch(search, (value) => {
       </div>
 
       <CustomTable :title="$t('pages.products.list.title')" :count="total" :loading="productsStore.loading && isProductModalOpen">        <template #header>
-          <CustomHeader>
-            <CustomHeaderItem class="w-3/12 min-w-[200px]">{{ $t('pages.products.list.columns.name') }}</CustomHeaderItem>
-            <CustomHeaderItem class="w-3/12 min-w-[200px]">{{ $t('pages.products.list.columns.brand') }}</CustomHeaderItem>
-            <CustomHeaderItem class="w-3/12 min-w-[200px]">{{ $t('pages.products.list.columns.type') }}</CustomHeaderItem>
-            <CustomHeaderItem class="w-3/12 min-w-[200px]">{{ $t('pages.products.list.columns.createdAt') }}</CustomHeaderItem>
-          </CustomHeader>
-        </template>
+        <CustomHeader>
+          <CustomHeaderItem class="w-3/12 min-w-[200px]">{{ $t('pages.products.list.columns.name') }}</CustomHeaderItem>
+          <CustomHeaderItem class="w-3/12 min-w-[200px]">{{ $t('pages.products.list.columns.brand') }}</CustomHeaderItem>
+          <CustomHeaderItem class="w-3/12 min-w-[200px]">{{ $t('pages.products.list.columns.type') }}</CustomHeaderItem>
+          <CustomHeaderItem class="w-3/12 min-w-[200px]">{{ $t('pages.products.list.columns.createdAt') }}</CustomHeaderItem>
+        </CustomHeader>
+      </template>
 
         <template #body>
           <CustomRow

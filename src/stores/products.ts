@@ -1,9 +1,11 @@
+// src/stores/products.ts
 import { defineStore } from 'pinia'
 import { productsModule, type Product } from '@/modules/products'
 
 interface ProductsState {
     products: Product[]
     product: Product | null
+    currentSearch: string
     loading: boolean
     error: string | null
     pagination: {
@@ -18,6 +20,7 @@ export const useProductsStore = defineStore('products', {
     state: (): ProductsState => ({
         products: [],
         product: null,
+        currentSearch: '',
         loading: false,
         error: null,
         pagination: {
@@ -29,10 +32,11 @@ export const useProductsStore = defineStore('products', {
     }),
 
     actions: {
-        async fetchProducts(page: number = 1) {
+        async fetchProducts(page: number = 1, search: string = '') {
             try {
                 this.loading = true
-                const response = await productsModule.getProducts(page)
+                this.currentSearch = search
+                const response = await productsModule.getProducts(page, search)
                 this.products = response.data.data
 
                 const { pagination } = response.data.meta
@@ -45,7 +49,7 @@ export const useProductsStore = defineStore('products', {
 
                 this.error = null
             } catch (error: any) {
-                this.error = error.response?.data?.message || 'Une erreur est survenue'
+                this.error = error.response?.data?.message || 'An error occurred'
                 throw error
             } finally {
                 this.loading = false
@@ -60,7 +64,7 @@ export const useProductsStore = defineStore('products', {
 
                 this.error = null
             } catch (error: any) {
-                this.error = error.response?.data?.message || 'Une erreur est survenue'
+                this.error = error.response?.data?.message || 'An error occurred'
                 throw error
             } finally {
                 this.loading = false
@@ -74,7 +78,7 @@ export const useProductsStore = defineStore('products', {
 
                 this.error = null
             } catch (error: any) {
-                this.error = error.response?.data?.message || 'Une erreur est survenue'
+                this.error = error.response?.data?.message || 'An error occurred'
                 throw error
             } finally {
                 this.loading = false
@@ -88,7 +92,7 @@ export const useProductsStore = defineStore('products', {
 
                 this.error = null
             } catch (error: any) {
-                this.error = error.response?.data?.message || 'Une erreur est survenue'
+                this.error = error.response?.data?.message || 'An error occurred'
                 throw error
             } finally {
                 this.loading = false
@@ -102,7 +106,7 @@ export const useProductsStore = defineStore('products', {
 
                 this.error = null
             } catch (error: any) {
-                this.error = error.response?.data?.message || 'Une erreur est survenue'
+                this.error = error.response?.data?.message || 'An error occurred'
                 throw error
             } finally {
                 this.loading = false

@@ -34,8 +34,9 @@ interface ProductsResponse {
 }
 
 export const productsModule = {
-    getProducts(page: number = 1) {
-        return api.get<ProductsResponse>(`/products?page=${page}`)
+    getProducts(page: number = 1, search: string = '') {
+        const searchQuery = search ? `&search=${search}` : ''
+        return api.get<ProductsResponse>(`/products?page=${page}${searchQuery}`)
     },
 
     getProduct(id: string) {
