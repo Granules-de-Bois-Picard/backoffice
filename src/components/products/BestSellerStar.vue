@@ -35,12 +35,10 @@ const tooltipText = computed(() => {
   >
     <StarIcon 
       :filled="props.isBestSeller" 
-      :class="{
-        'opacity-100': props.isBestSeller || isHovered,
-        'opacity-0': !props.isBestSeller && !isHovered,
-        'text-gray-400 hover:text-yellow-500': !props.isBestSeller,
-        'text-yellow-500': props.isBestSeller
-      }"
+      :class="[
+        props.isBestSeller || isHovered ? 'opacity-100' : 'opacity-0',
+        !props.isBestSeller ? 'text-gray-400 hover:text-yellow-500' : 'text-yellow-500'
+      ].join(' ')"
     />
     <div class="absolute z-10 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 pointer-events-none group-hover:opacity-100 whitespace-nowrap -left-1/2 -bottom-8 transform -translate-x-1/4">
       {{ tooltipText }}
