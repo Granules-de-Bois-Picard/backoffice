@@ -1,33 +1,63 @@
-# backoffice
+# Backoffice - Granulés de Bois Picard
 
-This template should help get you started developing with Vue 3 in Vite.
+Interface d'administration pour le site web de Granulés de Bois Picard. Cette application permet de gérer le contenu du site, les utilisateurs et les paramètres système.
 
-## Recommended IDE Setup
+## Fonctionnalités
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- **Tableau de bord** : Surveillance de l'état des services (Backoffice, Website, API)
+- **Gestion de contenu** : Articles, Produits, Carrousel, FAQ
+- **Gestion des fichiers** : Upload et organisation des médias
+- **Administration** : Gestion des utilisateurs, rôles et permissions
 
-## Type Support for `.vue` Imports in TS
+## Technologies utilisées
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+- Vue.js 3 avec Composition API
+- TypeScript
+- Tailwind CSS pour le style
+- Vue Router pour la navigation
+- Pinia pour la gestion d'état
+- Vue I18n pour l'internationalisation (Français/Anglais)
+- Vite comme outil de build
 
-## Customize configuration
+## Prérequis
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- Node.js (version recommandée : 18.x ou supérieure)
+- npm ou yarn
 
-## Project Setup
+## Installation
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+## Développement
+
+Lancer le serveur de développement :
 
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+L'application sera disponible à l'adresse http://localhost:5173/
+
+## Production
+
+Compiler et minifier pour la production :
 
 ```sh
 npm run build
 ```
+
+Prévisualiser la version de production :
+
+```sh
+npm run preview
+```
+
+## Configuration
+
+Le projet utilise les variables d'environnement pour la configuration. Créez un fichier `.env` à la racine du projet en vous basant sur l'exemple fourni.
+
+## Déploiement
+
+Le déploiement est automatisé via GitHub Actions. Consultez le fichier `.github/workflows/deploy.yml` pour plus de détails.
