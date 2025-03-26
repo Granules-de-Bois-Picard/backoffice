@@ -368,6 +368,10 @@
           "type": "Type",
           "createdAt": "Créé le"
         }
+      },
+      "bestSeller": {
+        "tooltip": "Marquer comme produit vedette",
+        "alreadyBestSeller": "Produit vedette"
       }
     },
     "FAQ": {

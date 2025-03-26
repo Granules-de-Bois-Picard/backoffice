@@ -5,6 +5,7 @@ import { productsModule, type Product } from '@/modules/products'
 interface ProductsState {
     products: Product[]
     product: Product | null
+    bestSellerProduct: Product | null
     currentSearch: string
     loading: boolean
     error: string | null
@@ -20,6 +21,7 @@ export const useProductsStore = defineStore('products', {
     state: (): ProductsState => ({
         products: [],
         product: null,
+        bestSellerProduct: null,
         currentSearch: '',
         loading: false,
         error: null,
@@ -104,6 +106,61 @@ export const useProductsStore = defineStore('products', {
                 this.loading = true
                 await productsModule.deleteProduct(productId)
 
+                this.error = null
+            } catch (error: any) {
+                this.error = error.response?.data?.message || 'An error occurred'
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async setBestSeller(productId: string) {
+            try {
+                this.loading = true
+                const response = await productsModule.setBestSeller(productId)
+                
+                // Update the product in the list
+                const updatedProduct = response.data.data
+                
+                // Reset all products' isBestSeller flag
+                this.products = this.products.map(product => ({
+                    ...product,
+                    isBestSeller: product.id === productId
+                }))
+                
+                // Update current product if it's the one being edited
+                if (this.product && this.product.id === productId) {
+                    this.product = {
+                        ...this.product,
+                        isBestSeller: true
+                    }
+                }
+                
+                this.bestSellerProduct = updatedProduct
+                this.error = null
+            } catch (error: any) {
+                this.error = error.response?.data?.message || 'An error occurred'
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async fetchBestSeller() {
+            try {
+                this.loading = true
+                const response = await productsModule.getBestSeller()
+                this.bestSellerProduct = response.data.data
+                
+                // Update the isBestSeller flag for all products in the list
+                if (this.bestSellerProduct) {
+                    this.products = this.products.map(product => ({
+                        ...product,
+                        isBestSeller: product.id === this.bestSellerProduct?.id
+                    }))
+                }
+                
                 this.error = null
             } catch (error: any) {
                 this.error = error.response?.data?.message || 'An error occurred'

@@ -368,6 +368,10 @@
           "type": "Type",
           "createdAt": "Created At"
         }
+      },
+      "bestSeller": {
+        "tooltip": "Mark as best seller",
+        "alreadyBestSeller": "Best seller"
       }
     },
     "FAQ": {

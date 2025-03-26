@@ -13,6 +13,7 @@ export interface Product {
     certifications: string
     availableColors: string[]
     hasWifiCompatibility: boolean
+    isBestSeller?: boolean
     created_at: string
     updated_at: string
 }
@@ -53,5 +54,13 @@ export const productsModule = {
 
     deleteProduct(id: string) {
         return api.delete<{success: boolean, message: string}>(`/products/${id}`)
+    },
+
+    setBestSeller(id: string) {
+        return api.post<{success: boolean, data: Product}>(`/products/set-best-seller`, { id })
+    },
+
+    getBestSeller() {
+        return api.get<{success: boolean, data: Product | null}>(`/products/best-seller`)
     }
 }

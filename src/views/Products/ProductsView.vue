@@ -13,6 +13,7 @@ import { useRouter } from "vue-router";
 import ProductCreationForm from "@/components/form/ProductCreationForm.vue";
 import Modal from "@/components/modals/Modal.vue";
 import ProductEditionForm from "@/components/form/ProductEditionForm.vue";
+import BestSellerStar from "@/components/products/BestSellerStar.vue";
 
 const router = useRouter();
 const productsStore = useProductsStore();
@@ -61,7 +62,10 @@ const openProductEditionModal = () => {
 }
 
 onMounted(async () => {
-  await productsStore.fetchProducts(1);
+  await Promise.all([
+    productsStore.fetchProducts(1),
+    productsStore.fetchBestSeller()
+  ]);
 })
 
 watch(search, (value) => {
@@ -86,9 +90,10 @@ watch(search, (value) => {
 
       <CustomTable :title="$t('pages.products.list.title')" :count="total" :loading="productsStore.loading && isProductModalOpen">        <template #header>
         <CustomHeader>
+          <CustomHeaderItem class="w-1/12 min-w-[50px]"></CustomHeaderItem>
           <CustomHeaderItem class="w-3/12 min-w-[200px]">{{ $t('pages.products.list.columns.name') }}</CustomHeaderItem>
           <CustomHeaderItem class="w-3/12 min-w-[200px]">{{ $t('pages.products.list.columns.brand') }}</CustomHeaderItem>
-          <CustomHeaderItem class="w-3/12 min-w-[200px]">{{ $t('pages.products.list.columns.type') }}</CustomHeaderItem>
+          <CustomHeaderItem class="w-2/12 min-w-[150px]">{{ $t('pages.products.list.columns.type') }}</CustomHeaderItem>
           <CustomHeaderItem class="w-3/12 min-w-[200px]">{{ $t('pages.products.list.columns.createdAt') }}</CustomHeaderItem>
         </CustomHeader>
       </template>
@@ -101,6 +106,9 @@ watch(search, (value) => {
               :is-last="product === products[products.length - 1]"
               @click="handleRowClick($event, product.id)"
           >
+            <CustomRowItem class="flex justify-center items-center">
+              <BestSellerStar :product-id="product.id" :is-best-seller="product.isBestSeller" />
+            </CustomRowItem>
             <CustomRowItem>{{ product.name }}</CustomRowItem>
             <CustomRowItem>{{ product.brand }}</CustomRowItem>
             <CustomRowItem>{{ product.type }}</CustomRowItem>
