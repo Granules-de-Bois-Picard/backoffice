@@ -57,7 +57,7 @@ export const productsModule = {
     },
 
     setBestSeller(id: string) {
-        return api.post<{success: boolean, data: Product}>(`/products/set-best-seller`, { id })
+        return api.put<{success: boolean, data: Product}>(`/products/${id}/set-best-seller`)
     },
 
     getBestSeller() {

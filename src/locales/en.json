@@ -370,7 +370,7 @@
         }
       },
       "bestSeller": {
-        "tooltip": "Mark as best seller",
+        "tooltip": "Best-seller?",
         "alreadyBestSeller": "Best seller"
       }
     },

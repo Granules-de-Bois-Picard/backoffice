@@ -370,7 +370,7 @@
         }
       },
       "bestSeller": {
-        "tooltip": "Marquer comme produit vedette",
+        "tooltip": "Best-seller ?",
         "alreadyBestSeller": "Produit vedette"
       }
     },

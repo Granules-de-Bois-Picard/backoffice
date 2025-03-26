@@ -36,7 +36,7 @@ const tooltipText = computed(() => {
     <StarIcon 
       :filled="props.isBestSeller" 
       :class="[
-        props.isBestSeller || isHovered ? 'opacity-100' : 'opacity-0',
+        'opacity-100',
         !props.isBestSeller ? 'text-gray-400 hover:text-yellow-500' : 'text-yellow-500'
       ].join(' ')"
     />
