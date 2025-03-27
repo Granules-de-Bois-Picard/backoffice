@@ -107,27 +107,101 @@ const handleUpload = async () => {
   }
 };
 
+// Convertit une image d'un format à un autre en utilisant Canvas
+const convertImageFormat = async (file: File, targetExtension: string): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    // Si le fichier n'est pas une image ou si l'extension cible n'est pas spécifiée, retourner le fichier original
+    if (!isImageFile(file) || !targetExtension) {
+      return resolve(file);
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          return reject(new Error('Impossible de créer le contexte canvas'));
+        }
+        
+        // Dessiner l'image sur le canvas
+        ctx.drawImage(img, 0, 0);
+        
+        // Déterminer le type MIME en fonction de l'extension cible
+        let mimeType = 'image/jpeg';
+        if (targetExtension === 'png') mimeType = 'image/png';
+        else if (targetExtension === 'webp') mimeType = 'image/webp';
+        else if (targetExtension === 'gif') mimeType = 'image/gif';
+        
+        // Convertir le canvas en blob avec le type MIME approprié
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            return reject(new Error('Échec de la conversion de l\'image'));
+          }
+          
+          // Créer un nouveau fichier avec le bon type MIME et extension
+          const fileName = file.name.split('.').slice(0, -1).join('.') + '.' + targetExtension;
+          const convertedFile = new File([blob], fileName, { type: mimeType });
+          resolve(convertedFile);
+        }, mimeType, 0.92); // Qualité de 92% pour un bon équilibre entre taille et qualité
+      };
+      img.onerror = () => reject(new Error('Échec du chargement de l\'image'));
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error('Échec de la lecture du fichier'));
+    reader.readAsDataURL(file);
+  });
+};
+
 const handleReplaceUpload = async () => {
   if (selectedFile.value) {
-    // Si c'est une image, on peut mettre à jour la prévisualisation immédiatement
-    if (isImageFile(selectedFile.value) && props.currentFileId) {
-      // Créer une URL temporaire pour la prévisualisation
-      const previewUrl = createImagePreview(selectedFile.value);
+    try {
+      let fileToUpload = selectedFile.value;
       
-      // Mettre à jour l'image dans le DOM pour une prévisualisation immédiate
-      // On utilise un timeout pour s'assurer que cette mise à jour se produit après la fermeture de la modal
-      setTimeout(() => {
-        const imgElement = document.getElementById(props.currentFileId || '')?.querySelector('img');
-        if (imgElement) {
-          imgElement.src = previewUrl;
+      // Si c'est une image et que les formats sont différents, convertir l'image
+      if (isImageFile(selectedFile.value) && props.currentFileExtension) {
+        const sourceExtension = selectedFile.value.name.split('.').pop()?.toLowerCase();
+        const targetExtension = props.currentFileExtension.toLowerCase();
+        
+        if (sourceExtension !== targetExtension) {
+          // Afficher un message de conversion
+          console.log(t('modals.replaceFile.imageConversion', {
+            sourceFormat: sourceExtension,
+            targetFormat: targetExtension
+          }));
+          
+          // Convertir l'image au format cible
+          fileToUpload = await convertImageFormat(selectedFile.value, targetExtension);
         }
-      }, 100);
+      }
+      
+      // Si c'est une image, on peut mettre à jour la prévisualisation immédiatement
+      if (isImageFile(fileToUpload) && props.currentFileId) {
+        // Créer une URL temporaire pour la prévisualisation
+        const previewUrl = createImagePreview(fileToUpload);
+        
+        // Mettre à jour l'image dans le DOM pour une prévisualisation immédiate
+        // On utilise un timeout pour s'assurer que cette mise à jour se produit après la fermeture de la modal
+        setTimeout(() => {
+          const imgElement = document.getElementById(props.currentFileId || '')?.querySelector('img');
+          if (imgElement) {
+            imgElement.src = previewUrl;
+          }
+        }, 100);
+      }
+      
+      // Envoyer le fichier converti à l'API
+      await filesStore.replaceFile(props.currentFileId || '', fileToUpload).then(() => {
+        filesStore.fetchFiles(filesStore.pagination.currentPage);
+        emit('close');
+      });
+    } catch (error) {
+      console.error('Erreur lors du remplacement du fichier:', error);
+      errorMessage.value = t('modals.uploadFile.errors.conversionNotPossible');
     }
-    
-    await filesStore.replaceFile(props.currentFileId || '', selectedFile.value).then(() => {
-      filesStore.fetchFiles(filesStore.pagination.currentPage);
-      emit('close');
-    });
   }
 };
 
