@@ -143,8 +143,9 @@ const openFileReplaceModal = () => {
 const closeFileReplaceModal = () => {
   isFileReplaceModalOpen.value = false;
   
-  // La mise à jour de l'aperçu est maintenant gérée dans le composant FileUploadForm
-  // pour une meilleure réactivité et une mise à jour en temps réel
+  // Forcer le rechargement des données après le remplacement d'un fichier
+  // pour s'assurer que les images sont correctement mises à jour
+  filesStore.fetchFiles(currentPage.value);
 };
 
 onMounted(async () => {
@@ -189,7 +190,7 @@ watch(search, (value) => {
           >
             <img
                 v-if="isImage(file.url)"
-                :src="file.url"
+                :src="file.url + '?t=' + new Date().getTime()"
                 :alt="file.name"
                 class="absolute inset-0 w-full h-full object-cover"
                 @error="file.url = 'image'"
