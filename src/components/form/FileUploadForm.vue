@@ -156,6 +156,13 @@ const convertImageFormat = async (file: File, targetExtension: string): Promise<
   });
 };
 
+// Fonction pour générer un nom de fichier aléatoire tout en conservant l'extension
+const generateRandomFileName = (originalName: string): string => {
+  const extension = originalName.split('.').pop() || '';
+  const randomString = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  return `${randomString}.${extension}`;
+};
+
 const handleReplaceUpload = async () => {
   if (selectedFile.value) {
     try {
@@ -183,9 +190,15 @@ const handleReplaceUpload = async () => {
         // Créer une URL temporaire pour la prévisualisation
         const previewUrl = createImagePreview(fileToUpload);
         
+        // Générer un nom de fichier aléatoire pour éviter les problèmes de cache
+        const randomFileName = generateRandomFileName(fileToUpload.name);
+        
+        // Créer une copie du fichier avec le nom aléatoire
+        const randomFileBlob = fileToUpload.slice(0, fileToUpload.size, fileToUpload.type);
+        const randomFile = new File([randomFileBlob], randomFileName, { type: fileToUpload.type });
+        
         // Mettre à jour toutes les instances de l'image dans le DOM pour une prévisualisation immédiate
         // On utilise un timeout pour s'assurer que cette mise à jour se produit après la fermeture de la modal
-        // et on force le navigateur à recharger l'image en ajoutant un paramètre timestamp
         const timestamp = new Date().getTime();
         const updateImages = () => {
           // Sélectionner l'élément par ID
@@ -194,8 +207,11 @@ const handleReplaceUpload = async () => {
             // Mettre à jour toutes les images à l'intérieur de cet élément
             const imgElements = fileElement.querySelectorAll('img');
             imgElements.forEach(img => {
+              // Créer une URL unique avec le nom de fichier aléatoire
+              const randomPreviewUrl = createImagePreview(randomFile);
+              
               // Ajouter un timestamp pour forcer le rechargement et éviter le cache
-              img.setAttribute('src', `${previewUrl}?t=${timestamp}`);
+              img.setAttribute('src', `${randomPreviewUrl}?t=${timestamp}`);
               
               // Forcer le navigateur à recharger l'image
               img.onload = null;
@@ -207,7 +223,7 @@ const handleReplaceUpload = async () => {
                 // Une fois chargée, remplacer l'ancienne image
                 img.src = newImg.src;
               };
-              newImg.src = `${previewUrl}?t=${timestamp}`;
+              newImg.src = `${randomPreviewUrl}?t=${timestamp}`;
             });
           }
         };
@@ -215,6 +231,9 @@ const handleReplaceUpload = async () => {
         // Exécuter immédiatement et après un court délai pour s'assurer que le DOM est mis à jour
         updateImages();
         setTimeout(updateImages, 100);
+        
+        // Utiliser le fichier original pour l'upload à l'API
+        fileToUpload = fileToUpload;
       }
       
       // Envoyer le fichier converti à l'API
