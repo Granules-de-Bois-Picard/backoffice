@@ -183,14 +183,38 @@ const handleReplaceUpload = async () => {
         // Créer une URL temporaire pour la prévisualisation
         const previewUrl = createImagePreview(fileToUpload);
         
-        // Mettre à jour l'image dans le DOM pour une prévisualisation immédiate
+        // Mettre à jour toutes les instances de l'image dans le DOM pour une prévisualisation immédiate
         // On utilise un timeout pour s'assurer que cette mise à jour se produit après la fermeture de la modal
-        setTimeout(() => {
-          const imgElement = document.getElementById(props.currentFileId || '')?.querySelector('img');
-          if (imgElement) {
-            imgElement.src = previewUrl;
+        // et on force le navigateur à recharger l'image en ajoutant un paramètre timestamp
+        const timestamp = new Date().getTime();
+        const updateImages = () => {
+          // Sélectionner l'élément par ID
+          const fileElement = document.getElementById(props.currentFileId || '');
+          if (fileElement) {
+            // Mettre à jour toutes les images à l'intérieur de cet élément
+            const imgElements = fileElement.querySelectorAll('img');
+            imgElements.forEach(img => {
+              // Ajouter un timestamp pour forcer le rechargement et éviter le cache
+              img.setAttribute('src', `${previewUrl}?t=${timestamp}`);
+              
+              // Forcer le navigateur à recharger l'image
+              img.onload = null;
+              img.onerror = null;
+              
+              // Créer une nouvelle image pour précharger
+              const newImg = new Image();
+              newImg.onload = function() {
+                // Une fois chargée, remplacer l'ancienne image
+                img.src = newImg.src;
+              };
+              newImg.src = `${previewUrl}?t=${timestamp}`;
+            });
           }
-        }, 100);
+        };
+        
+        // Exécuter immédiatement et après un court délai pour s'assurer que le DOM est mis à jour
+        updateImages();
+        setTimeout(updateImages, 100);
       }
       
       // Envoyer le fichier converti à l'API
