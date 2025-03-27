@@ -3,7 +3,9 @@ import { ref, defineEmits, onMounted } from 'vue';
 import { useFilesStore } from '@/stores/files';
 import ActionButton from "@/components/commons/ActionButton.vue";
 import {XMarkIcon} from "@heroicons/vue/24/solid";
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const emit = defineEmits(['close']);
 const filesStore = useFilesStore();
 const dragOver = ref(false);
@@ -22,7 +24,7 @@ const handleDrop = (event: DragEvent) => {
   if (event.dataTransfer?.files.length) {
     const file = event.dataTransfer.files[0];
     if (file.size > 5 * 1024 * 1024) {
-      errorMessage.value = 'File size exceeds 5 MB';
+      errorMessage.value = t('modals.uploadFile.errors.fileSize');
     } else {
       selectedFile.value = file;
       errorMessage.value = null;
@@ -44,15 +46,56 @@ const handleFileChange = (event: Event) => {
   if (target.files?.length) {
     const file = target.files[0];
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    
     if (file.size > 5 * 1024 * 1024) {
-      errorMessage.value = 'File size exceeds 5 MB';
-    } else if (props.replace && fileExtension !== props.currentFileExtension?.toLowerCase()) {
-      errorMessage.value = `File extension must be .${props.currentFileExtension}`;
+      errorMessage.value = t('modals.uploadFile.errors.fileSize');
+    } else if (props.replace) {
+      // Vérification pour le remplacement de fichier
+      const isSourceImage = isImageFile(file);
+      const isTargetImage = isImageFile(props.currentFileExtension || '');
+      
+      if (isSourceImage && isTargetImage) {
+        // Les deux sont des images, on peut faire la conversion
+        selectedFile.value = file;
+        errorMessage.value = null;
+        
+        // Afficher un message de conversion si les formats sont différents
+        if (fileExtension !== props.currentFileExtension?.toLowerCase()) {
+          // Ce message sera affiché comme une information, pas comme une erreur
+          console.log(t('modals.replaceFile.imageConversion', {
+            sourceFormat: fileExtension,
+            targetFormat: props.currentFileExtension
+          }));
+        }
+      } else if (!isSourceImage && !isTargetImage && fileExtension !== props.currentFileExtension?.toLowerCase()) {
+        // Si ce ne sont pas des images et les extensions sont différentes
+        errorMessage.value = t('modals.uploadFile.errors.fileExtension', {
+          extension: props.currentFileExtension
+        });
+      } else {
+        selectedFile.value = file;
+        errorMessage.value = null;
+      }
     } else {
+      // Upload normal (pas de remplacement)
       selectedFile.value = file;
       errorMessage.value = null;
     }
   }
+};
+
+// Vérifie si le fichier est une image
+const isImageFile = (file: File | string): boolean => {
+  if (typeof file === 'string') {
+    return /^(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(file);
+  }
+  const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+  return /^(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(fileExtension);
+};
+
+// Crée une prévisualisation de l'image
+const createImagePreview = (file: File): string => {
+  return URL.createObjectURL(file);
 };
 
 const handleUpload = async () => {
@@ -66,6 +109,21 @@ const handleUpload = async () => {
 
 const handleReplaceUpload = async () => {
   if (selectedFile.value) {
+    // Si c'est une image, on peut mettre à jour la prévisualisation immédiatement
+    if (isImageFile(selectedFile.value) && props.currentFileId) {
+      // Créer une URL temporaire pour la prévisualisation
+      const previewUrl = createImagePreview(selectedFile.value);
+      
+      // Mettre à jour l'image dans le DOM pour une prévisualisation immédiate
+      // On utilise un timeout pour s'assurer que cette mise à jour se produit après la fermeture de la modal
+      setTimeout(() => {
+        const imgElement = document.getElementById(props.currentFileId || '')?.querySelector('img');
+        if (imgElement) {
+          imgElement.src = previewUrl;
+        }
+      }, 100);
+    }
+    
     await filesStore.replaceFile(props.currentFileId || '', selectedFile.value).then(() => {
       filesStore.fetchFiles(filesStore.pagination.currentPage);
       emit('close');
@@ -121,7 +179,7 @@ const formatFileSize = (size: number) => {
         @click="fileInput?.click()"
     >
       <p v-if="!selectedFile" class="text-center">
-        {{ $t('modals.uploadFile.description') }}
+        {{ t('modals.uploadFile.description') }}
       </p>
       <div v-else class="flex flex-col items-center gap-4">
         <font-awesome-icon
@@ -150,21 +208,21 @@ const formatFileSize = (size: number) => {
       <div v-if="filesStore.$state.error" class="bg-error p-2 rounded-md bg-opacity-10 overflow-hidden w-full">
         <p>
           <XMarkIcon class="h-5 w-5 inline-block text-error" />
-          <span class="text-sm text-error">{{ $t('errors.unexpected') }}</span>
+          <span class="text-sm text-error">{{ t('errors.unexpected') }}</span>
         </p>
       </div>
     </transition>
 
     <ActionButton
         v-if="!replace"
-        :label="$t('common.actions.upload')"
+        :label="t('common.actions.upload')"
         @click="handleUpload"
         :disabled="!selectedFile"
     />
 
     <ActionButton
         v-else
-        :label="$t('common.actions.replace')"
+        :label="t('common.actions.replace')"
         @click="handleReplaceUpload"
         :disabled="!selectedFile"
     />

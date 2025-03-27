@@ -77,10 +77,16 @@
     "uploadFile": {
       "title": "Téléverser un fichier",
       "description": "Glissez et déposez un fichier ou cliquez pour le téléverser",
-      "submit": "Téléverser"
+      "submit": "Téléverser",
+      "errors": {
+        "fileSize": "La taille du fichier dépasse 5 Mo",
+        "fileExtension": "L'extension du fichier doit être .{extension}",
+        "conversionNotPossible": "La conversion de format n'est pas possible"
+      }
     },
     "replaceFile": {
-      "title": "Remplacer le fichier"
+      "title": "Remplacer le fichier",
+      "imageConversion": "Conversion automatique de {sourceFormat} vers {targetFormat}"
     },
     "passwordChange": {
       "title": "Changer le mot de passe",

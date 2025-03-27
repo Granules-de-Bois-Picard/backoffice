@@ -142,9 +142,9 @@ const openFileReplaceModal = () => {
 
 const closeFileReplaceModal = () => {
   isFileReplaceModalOpen.value = false;
-
-  // Recharger uniquement l'aperçu de l'image
-  document.getElementById(currentFileId.value || '')?.querySelector('img')?.setAttribute('src', files.value.find(f => f.id === currentFileId.value)?.url || '');
+  
+  // La mise à jour de l'aperçu est maintenant gérée dans le composant FileUploadForm
+  // pour une meilleure réactivité et une mise à jour en temps réel
 };
 
 onMounted(async () => {

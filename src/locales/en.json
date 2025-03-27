@@ -77,10 +77,16 @@
     "uploadFile": {
       "title": "Upload File",
       "description": "Drag and drop a file or click to upload",
-      "submit": "Upload"
+      "submit": "Upload",
+      "errors": {
+        "fileSize": "File size exceeds 5 MB",
+        "fileExtension": "File extension must be .{extension}",
+        "conversionNotPossible": "Format conversion is not possible"
+      }
     },
     "replaceFile": {
-      "title": "Replace File"
+      "title": "Replace File",
+      "imageConversion": "Automatic conversion from {sourceFormat} to {targetFormat}"
     },
     "passwordChange": {
       "title": "Change Password",
